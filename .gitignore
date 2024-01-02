@@ -3,3 +3,6 @@ env
 
 # Peygard application
 peygard/.env
+
+# Python cache
+*.pyc
