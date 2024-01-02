@@ -1,17 +1,28 @@
 import requests
 import json
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Peygard:
     def __init__(
-        self, app_list_url, app_list_file_dir, app_details_url, app_reviews_url
+        self,
+        app_list_url,
+        app_list_file_dir,
+        app_details_url,
+        app_reviews_url,
+        app_achievements_url,
+        app_achievements_gp_url,
     ):
         self.app_list_url = app_list_url
         self.app_list_file_dir = app_list_file_dir
         self.app_list = None
         self.app_details_url = app_details_url
         self.app_reviews_url = app_reviews_url
+        self.app_achievements_url = app_achievements_url
+        self.app_achievements_gp_url = app_achievements_gp_url
 
     def get_app_list(self):
         if self.app_list_file_dir is not None:
@@ -70,3 +81,30 @@ class Peygard:
             json.dump(data, app)
 
         return response
+
+    def get_app_achievements_info(self, app_id, language="english", format="json"):
+        response = requests.get(
+            self.app_achievements_url,
+            params={
+                "appid": app_id,
+                "key": os.environ["STEAM_API_KEY"],
+                "l": language,
+                "format": format,
+            },
+        )
+        with open(os.path.join("data", f"{app_id}-achievements.json"), "w") as app:
+            data = response.json()
+            json.dump(data, app)
+
+        response = requests.get(
+            self.app_achievements_gp_url,
+            params={
+                "gameid": app_id,
+                "format": format,
+            },
+        )
+        with open(
+            os.path.join("data", f"{app_id}-achievements-global-percentage.json"), "w"
+        ) as app:
+            data = response.json()
+            json.dump(data, app)
