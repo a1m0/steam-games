@@ -134,7 +134,13 @@ class Peygard:
     def get_app_players_history(self, app_id):
         page = requests.get(self.app_players_history_url + f"{app_id}")
         soup = BeautifulSoup(page.content, "html.parser")
-        table_rows = soup.find(class_="common-table").find("tbody").find_all("tr")
+        table = soup.find(class_="common-table")
+        table_rows = None
+        if table:
+            table_rows = table.find("tbody").find_all("tr")
+        else:
+            print(f"app with app id: {app_id} does not have any players history.")
+            return None
 
         history = []
         for row in table_rows:
