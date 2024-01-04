@@ -53,10 +53,14 @@ class Peygard:
             params={"appids": app_id, "cc": currency, "l": language},
         )
 
-        with open(os.path.join("data", f"{app_id}.json"), "w") as app:
-            data = response.json()
-            json.dump(data, app)
+        if not os.path.exists(os.path.join("data", str(app_id))):
+            os.makedirs(os.path.join("data", str(app_id)))
 
+        with open(os.path.join("data", str(app_id), "details.json"), "w") as d:
+            data = response.json()
+            json.dump(data, d)
+
+        print(f"Successfully created {app_id} details file.")
         return response
 
     def get_app_reviews(
@@ -70,7 +74,6 @@ class Peygard:
         num_per_page=100,
         filter_offtopic_activity=0,
     ):
-        print("requestng", self.app_reviews_url, app_id)
         response = requests.get(
             f"{self.app_reviews_url}{app_id}",
             params={
@@ -85,13 +88,20 @@ class Peygard:
             },
         )
 
-        with open(os.path.join("data", f"{app_id}-reviews.json"), "w") as app:
-            data = response.json()
-            json.dump(data, app)
+        if not os.path.exists(os.path.join("data", str(app_id))):
+            os.makedirs(os.path.join("data", str(app_id)))
 
+        with open(os.path.join("data", str(app_id), "reviews.json"), "w") as r:
+            data = response.json()
+            json.dump(data, r)
+
+        print(f"Successfully created {app_id} reviews file.")
         return response
 
     def get_app_achievements_info(self, app_id, language="english", format="json"):
+        if not os.path.exists(os.path.join("data", str(app_id))):
+            os.makedirs(os.path.join("data", str(app_id)))
+
         response = requests.get(
             self.app_achievements_url,
             params={
@@ -101,9 +111,10 @@ class Peygard:
                 "format": format,
             },
         )
-        with open(os.path.join("data", f"{app_id}-achievements.json"), "w") as app:
+        with open(os.path.join("data", str(app_id), "achievements.json"), "w") as a:
             data = response.json()
-            json.dump(data, app)
+            json.dump(data, a)
+        print(f"Successfully created {app_id} achievements file.")
 
         response = requests.get(
             self.app_achievements_gp_url,
@@ -113,10 +124,12 @@ class Peygard:
             },
         )
         with open(
-            os.path.join("data", f"{app_id}-achievements-global-percentage.json"), "w"
-        ) as app:
+            os.path.join("data", str(app_id), "achievements-global-percentage.json"),
+            "w",
+        ) as agp:
             data = response.json()
-            json.dump(data, app)
+            json.dump(data, agp)
+        print(f"Successfully created {app_id} achievements-global-percentage file.")
 
     def get_app_players_history(self, app_id):
         page = requests.get(self.app_players_history_url + f"{app_id}")
@@ -134,8 +147,12 @@ class Peygard:
             }
             history.append(cleaned_data)
 
-        with open(os.path.join("data", f"{app_id}-players-history.json"), "w") as app:
-            data = {"history": history}
-            json.dump(data, app)
+        if not os.path.exists(os.path.join("data", str(app_id))):
+            os.makedirs(os.path.join("data", str(app_id)))
 
+        with open(os.path.join("data", str(app_id), "players-history.json"), "w") as ph:
+            data = {"history": history}
+            json.dump(data, ph)
+
+        print(f"Successfully created {app_id} players-history file.")
         return history
