@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,6 +16,7 @@ class Peygard:
         app_reviews_url,
         app_achievements_url,
         app_achievements_gp_url,
+        app_players_history_url,
     ):
         self.app_list_url = app_list_url
         self.app_list_file_dir = app_list_file_dir
@@ -23,6 +25,7 @@ class Peygard:
         self.app_reviews_url = app_reviews_url
         self.app_achievements_url = app_achievements_url
         self.app_achievements_gp_url = app_achievements_gp_url
+        self.app_players_history_url = app_players_history_url
 
     def get_app_list(self):
         if self.app_list_file_dir is not None:
@@ -108,3 +111,25 @@ class Peygard:
         ) as app:
             data = response.json()
             json.dump(data, app)
+
+    def get_app_players_history(self, app_id):
+        page = requests.get(self.app_players_history_url + f"{app_id}")
+        soup = BeautifulSoup(page.content, "html.parser")
+        table_rows = soup.find(class_="common-table").find("tbody").find_all("tr")
+
+        history = []
+        for row in table_rows:
+            cleaned_data = {
+                "month": row.find(class_="month-cell").text.strip(),
+                "avg_players": row.find(class_="num-f").text,
+                "gain_number": row.find(class_="num-p").text,
+                "gain_percent": row.find_all("td")[-2].text.replace("%", ""),
+                "peak_players": row.find_all("td")[-1].text,
+            }
+            history.append(cleaned_data)
+
+        with open(os.path.join("data", f"{app_id}-players-history.json"), "w") as app:
+            data = {"history": history}
+            json.dump(data, app)
+
+        return history
