@@ -1,4 +1,5 @@
 from peygard import Peygard
+import time
 
 p = Peygard(
     app_list_url="https://api.steampowered.com/ISteamApps/GetAppList/v0002/",
@@ -10,8 +11,13 @@ p = Peygard(
     app_players_history_url="https://steamcharts.com/app/",
 )
 
-# p.get_app_list()
-# print(p.app_list)
-# print(p.get_app_reviews(app_id=1086940, language="english").json())
-# p.get_app_achievements_info(app_id=1086940)
-p.get_app_players_history(app_id=1086940)
+p.get_app_list()
+
+for app in p.app_list["applist"]["apps"][:10]:
+    print(app)
+    p.get_app_details(app_id=app["appid"])
+    p.get_app_reviews(app_id=app["appid"])
+    p.get_app_achievements_info(app_id=app["appid"])
+    p.get_app_players_history(app_id=app["appid"])
+
+    time.sleep(5)
