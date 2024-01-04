@@ -28,10 +28,13 @@ class Peygard:
         self.app_players_history_url = app_players_history_url
 
     def get_app_list(self):
-        if self.app_list_file_dir is not None:
+        source = "Unknown"
+        if os.path.isfile(self.app_list_file_dir) is True:
+            source = "Local File"
             with open(self.app_list_file_dir, "r") as f:
                 self.app_list = json.load(f)
         else:
+            source = "Steam API"
             response = requests.get(self.app_list_url)
 
             with open(self.app_list_file_dir, "w") as app_list_file:
@@ -39,7 +42,10 @@ class Peygard:
                 self.app_list = data
                 json.dump(data, app_list_file)
 
-            return response
+        print(
+            f"{len(self.app_list['applist']['apps'])} games fetched successfully from {source}!!!"
+        )
+        return self.app_list
 
     def get_app_details(self, app_id, currency="us", language="en"):
         response = requests.get(
